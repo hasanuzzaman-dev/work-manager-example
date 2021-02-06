@@ -2,6 +2,9 @@ package com.hasan.workmanager;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
+import androidx.work.Constraints;
+import androidx.work.NetworkType;
+import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
@@ -15,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button doWorkBtn, cancelBtn;
+    private Button doWorkBtn;
     private TextView textView;
 
     @Override
@@ -25,30 +28,28 @@ public class MainActivity extends AppCompatActivity {
 
         doWorkBtn = findViewById(R.id.button);
         textView = findViewById(R.id.resultTV);
-        cancelBtn = findViewById(R.id.cancelBtn);
+
 
         // You can not set less then 15 as time interval
-        PeriodicWorkRequest periodicWorkRequest = new PeriodicWorkRequest.Builder(
-                MyWorker.class,
-                15,
-                TimeUnit.MINUTES
-                ).build();
+        Constraints constraints = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.UNMETERED)
+                .build();
+
+        OneTimeWorkRequest oneTimeWorkRequest = new OneTimeWorkRequest.Builder(MyWorker.class)
+                .setConstraints(constraints)
+                .build();
+
 
         doWorkBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                WorkManager.getInstance(MainActivity.this).enqueue(periodicWorkRequest);
+                WorkManager.getInstance(MainActivity.this).enqueue(oneTimeWorkRequest);
             }
         });
 
-        cancelBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                WorkManager.getInstance(MainActivity.this).cancelWorkById(periodicWorkRequest.getId());
-            }
-        });
 
-        WorkManager.getInstance(this).getWorkInfoByIdLiveData(periodicWorkRequest.getId())
+
+        WorkManager.getInstance(this).getWorkInfoByIdLiveData(oneTimeWorkRequest.getId())
                 .observe(this, new Observer<WorkInfo>() {
                     @Override
                     public void onChanged(WorkInfo workInfo) {
