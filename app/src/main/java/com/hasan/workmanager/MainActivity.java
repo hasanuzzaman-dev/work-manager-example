@@ -2,6 +2,8 @@ package com.hasan.workmanager;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
+import androidx.work.Constraints;
+import androidx.work.NetworkType;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
@@ -13,7 +15,7 @@ import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button button;
+    private Button doWorkBtn;
     private TextView textView;
 
     @Override
@@ -21,12 +23,18 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        button = findViewById(R.id.button);
+        doWorkBtn = findViewById(R.id.button);
         textView = findViewById(R.id.resultTV);
 
-        OneTimeWorkRequest oneTimeWorkRequest = new OneTimeWorkRequest.Builder(MyWorker.class).build();
+        Constraints constraints = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.UNMETERED)
+                .build();
 
-        button.setOnClickListener(new View.OnClickListener() {
+        OneTimeWorkRequest oneTimeWorkRequest = new OneTimeWorkRequest.Builder(MyWorker.class)
+                .setConstraints(constraints)
+                .build();
+
+        doWorkBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 WorkManager.getInstance(MainActivity.this).enqueue(oneTimeWorkRequest);
