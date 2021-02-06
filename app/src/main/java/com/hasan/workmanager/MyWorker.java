@@ -7,6 +7,7 @@ import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
+import androidx.work.Data;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
@@ -22,8 +23,17 @@ public class MyWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        displayNotification("Demo Task", "This is a demo task");
-        return Result.success();
+
+        Data retrieveData = getInputData();
+        String description = retrieveData.getString("data");
+
+        displayNotification("Demo Task", description);
+
+        Data outputData = new Data.Builder()
+                .putString("output_data","This is an output data!")
+                .build();
+
+        return Result.success(outputData);
     }
 
     private void displayNotification(String task, String description) {
