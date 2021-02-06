@@ -3,6 +3,7 @@ package com.hasan.workmanager;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.work.Constraints;
+import androidx.work.Data;
 import androidx.work.NetworkType;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
@@ -29,14 +30,13 @@ public class MainActivity extends AppCompatActivity {
         doWorkBtn = findViewById(R.id.button);
         textView = findViewById(R.id.resultTV);
 
-
-        // You can not set less then 15 as time interval
-        Constraints constraints = new Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.UNMETERED)
+        // android recommend data size only 10 kb
+        Data inputData = new Data.Builder()
+                .putString("data","This is input data")
                 .build();
 
         OneTimeWorkRequest oneTimeWorkRequest = new OneTimeWorkRequest.Builder(MyWorker.class)
-                .setConstraints(constraints)
+                .setInputData(inputData)
                 .build();
 
 
@@ -53,9 +53,15 @@ public class MainActivity extends AppCompatActivity {
                 .observe(this, new Observer<WorkInfo>() {
                     @Override
                     public void onChanged(WorkInfo workInfo) {
-                        String status = workInfo.getState().name();
+                        //String status = workInfo.getState().name();
 
-                        textView.append(status + "\n");
+                        if (workInfo != null && workInfo.getState().isFinished()){
+                            Data retrieveData = workInfo.getOutputData();
+                            String outputString = retrieveData.getString("output_data");
+
+                            textView.append(outputString + "\n");
+                        }
+
                     }
                 });
 
